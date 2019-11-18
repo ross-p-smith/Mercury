@@ -1,0 +1,88 @@
+name: Mercury
+
+on: [push]
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  AKS_SP_APP_ID: ${{ secrets.AKS_SP_APP_ID }}
+  AKS_SP_OBJECT_ID: ${{ secrets.AKS_SP_OBJECT_ID }}
+  AKS_SP_CLIENT_SECRET: ${{ secrets.AKS_SP_CLIENT_SECRET }}
+
+jobs:
+  # docker:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v1
+  #     with:
+  #       submodules: recursive
+  #   - name: Docker build
+  #     run:  "build/scripts/dockerbuild.sh"
+  #     shell: bash
+
+  # cleanup:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v1
+  #     with:
+  #   - name: Terraform Destroy
+  #     if: always()
+  #     run:  "deploy/azure/scripts/terraformdestroy.sh"
+  #     shell: bash
+  #   - name: Docker Cleanup
+  #     if: always()
+  #     run:  "build/scripts/dockercleanup.sh"
+  #     shell: bash
+
+  infrastructure:
+    runs-on: ubuntu-latest
+    env:
+      BASE_RESOURCE_NAME: ross123a
+      AKS_CLUSTER_NAME: ross123a
+      AKS_RESOURCE_GROUP_NAME: ross123a
+      DEPLOYMENT_LOCATION: westeurope
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+    - name: Docker build
+      run:  "build/scripts/dockerbuild.sh"
+      shell: bash
+    - name: Terraform Apply
+      run:  "deploy/azure/scripts/terraformapply.sh"
+      shell: bash
+    - name: Docker push
+      run:  deploy/azure/scripts/dockerpush.sh
+      shell: bash
+      env:
+        IMAGE_TAG: "latest"
+    - name: Get kubeconfig
+      run:  "deploy/azure/scripts/getkubeconfig.sh"
+      shell: bash
+      env:
+        KUBECONFIG: "${HOME}/.kubeconfig"
+    - name: Deploy to Kubernetes
+      run:  "deploy/azure/scripts/deploytokubernetes.sh"
+      shell: bash
+      env:
+        IMAGE_TAG: "latest"
+        DISABLE_OAUTH_PERMANENTLY: "DISABLE_OAUTH_FOR_CI"
+        KUBECONFIG: "${HOME}/.kubeconfig"
+        HELM_HOME: "${HOME}/.helmconfig"
+        DOCKER_CONFIG: "${HOME}/.dockerconfig"
+        AZURE_CONFIG_DIR: "${HOME}/.azureconfig"
+    - name: Integration Tests
+      run:  "deploy/common/scripts/integrationtest.sh"
+      shell: bash
+      env:
+        KUBECONFIG: "${HOME}/.kubeconfig"
+    - name: Terraform Destroy
+      if: always()
+      run:  "deploy/azure/scripts/terraformdestroy.sh"
+      shell: bash
+    - name: Docker Cleanup
+      if: always()
+      run:  "build/scripts/dockercleanup.sh"
+      shell: bash

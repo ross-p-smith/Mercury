@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  ingestion-api:
+    environment:
+      - Cloud=azure
+      - AzureStorageAccessToken=$ACCESS_TOKEN
+      - StorageFolder=work
+      - QueueName=workqueue
+      - DISABLE_OAUTH_PERMANENTLY=DISABLE_OAUTH_FOR_CI
+      - AzureStorageAccountName=$STORAGE_ACCOUNT
+  messageprocessor:
+    environment:
+      - Cloud=azure
+      - AzureStorageAccessToken=$ACCESS_TOKEN
+      - StorageFolder=work
+      - QueueName=workqueue
+      - AzureStorageAccountName=$STORAGE_ACCOUNT 

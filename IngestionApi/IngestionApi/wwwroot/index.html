@@ -1,0 +1,14 @@
+﻿<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" http-equiv="cache-control" content="max-age=0" />
+    <title>Upload your files</title>
+</head>
+    <body>
+        <form action="/api/upload" enctype="multipart/form-data" method="post">
+            <input multiple="multiple" name="files" type="file" />
+            <input type="submit" value="Upload" />
+        </form>
+    </body>
+</html>

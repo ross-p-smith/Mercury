@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  ingestion-api:
+    environment:
+      - Cloud=gcp
+      - GoogleProjectID=$GOOGLE_PROJECT_ID
+      - GoogleSubscriptionName=worksub
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp.json
+      - StorageFolder=$GOOGLE_STORAGE_BUCKET
+      - QueueName=workqueue
+      - DISABLE_OAUTH_PERMANENTLY=DISABLE_OAUTH_FOR_CI
+    volumes: 
+      - $GOOGLE_APPLICATION_CREDENTIALS:/app/gcp.json
+  messageprocessor:
+    environment:
+      - Cloud=gcp
+      - GoogleProjectID=$GOOGLE_PROJECT_ID
+      - GoogleSubscriptionName=worksub
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp.json
+      - StorageFolder=$GOOGLE_STORAGE_BUCKET
+      - QueueName=workqueue
+      - DISABLE_OAUTH_PERMANENTLY=DISABLE_OAUTH_FOR_CI
+    volumes: 
+      - $GOOGLE_APPLICATION_CREDENTIALS:/app/gcp.json

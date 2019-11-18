@@ -1,0 +1,98 @@
+pipeline {
+    agent {
+        node {
+            label ''
+            customWorkspace "${JENKINS_HOME}/workspace/${JOB_NAME}/${BUILD_NUMBER}/gcp"
+        }
+    }
+
+    parameters {
+        string(name: 'LOCATION', defaultValue: 'us-central1-a', description: 'Deployment location')
+        string(name: 'PROJECT_NAME', defaultValue: '', description: 'The GCP Project to deploy into')
+    }
+
+    environment {
+        KUBECONFIG="${env.WORKSPACE}/.kubeconfig"
+        HELM_HOME="${env.WORKSPACE}/.helmconfig"
+        DOCKER_CONFIG="${env.WORKSPACE}/.dockerconfig"
+
+        GOOGLE_CLOUD_KEYFILE_JSON = credentials("gcp_secrets_json")
+        GOOGLE_APPLICATION_CREDENTIALS_JSON = sh(script: "cat ${env.GOOGLE_CLOUD_KEYFILE_JSON}", returnStdout: true).trim()
+
+        DEPLOYMENT_LOCATION = "${params.LOCATION}"
+
+        PROJECT_NAME = "${params.PROJECT_NAME}"
+
+        BASE_RESOURCE_NAME = "mercury${BUILD_NUMBER}"
+
+        IMAGE_TAG = "latest"
+
+        DISABLE_OAUTH_PERMANENTLY="DISABLE_OAUTH_FOR_CI"
+    }
+
+    stages {
+
+        stage ("Terraform Apply")
+        {
+            steps {
+
+                sh '''
+                    ./deploy/gcp/scripts/terraformapply.sh
+                '''
+            }
+        }
+
+        stage ("Docker Push")
+        {
+            steps {
+
+                sh '''
+                    ./deploy/gcp/scripts/dockerpush.sh
+                '''
+            }
+        }
+
+        stage ("Get KubeConfig")
+        {
+            steps {
+                sh '''
+                    ./deploy/gcp/scripts/getkubeconfig.sh
+                '''
+            }
+        }
+
+        stage ("Deploy to Kubernetes")
+        {
+            steps {
+                sh '''
+                    ./deploy/gcp/scripts/deploytokubernetes.sh
+                '''
+            }
+        }
+
+        stage ("Integration Tests")
+        {
+            steps {
+                sh '''
+                    ./deploy/common/scripts/integrationtest.sh
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+
+            retry(3) {
+                sh '''
+                    ./deploy/gcp/scripts/terraformdestroy.sh
+                '''
+            }
+
+        }
+
+        failure {
+            sh 'echo "failed"'
+        }
+    }
+}

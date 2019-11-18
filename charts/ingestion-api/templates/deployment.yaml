@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ include "ingestion-api.fullname" . }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ingestion-api
+  template:
+    metadata:
+      labels:
+        aadpodidbinding: cloud-resource-access
+        app: ingestion-api
+    spec:
+      containers:
+        - image: "{{ .Values.global.image.repository }}/ingestion-api:{{ .Values.global.image.tag }}"
+          imagePullPolicy: Always
+          name: ingestion-api
+
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          env:
+            - name: Cloud
+              value: "{{ .Values.global.cloud }}"
+            - name: StorageFolder
+              value: "{{ .Values.storage_folder }}"
+            - name: QueueName
+              value: "{{ .Values.storage.queue.name }}"
+            - name: DISABLE_OAUTH_PERMANENTLY
+              value: "{{ .Values.disable.oauth }}"
+
+            {{ if eq .Values.global.cloud "azure" }}
+            - name: ApplicationInsights__InstrumentationKey
+              value: "{{ .Values.azure.instrumentation.key }}"
+            - name: AzureStorageAccountName
+              value: "{{ .Values.azureaccount.name }}"
+            - name: AzureAD__ClientID
+              value: "{{ .Values.oauth.clientId }}"
+            - name: AzureAD__TenantID
+              value: "{{ .Values.oauth.tenantId }}"
+            {{ end }}
+
+            {{ if eq .Values.global.cloud "gcp" }}
+            - name: GoogleProjectID
+              value: "{{ .Values.gcp.project_id }}"
+            - name: GoogleSubscriptionName
+              value: "{{ .Values.gcp.pubsub.subscriptionName }}"
+            - name: GoogleAuthenticationClientId
+              value: "{{ .Values.oauth.clientId }}"
+            - name: GoogleAuthenticationClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secret
+                  key: client
+            {{ end }}

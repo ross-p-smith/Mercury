@@ -1,0 +1,11 @@
+dependencies:
+- name: aad-pod-identity
+  condition: aad-pod-identity.enabled
+  version: "*"
+  repository: "file://../aad-pod-identity"
+- name: ingestion-api
+  version: "*"
+  repository: "file://../ingestion-api"
+- name: keda
+  version: "*"
+  repository: "file://../keda"

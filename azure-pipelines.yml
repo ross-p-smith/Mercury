@@ -1,0 +1,96 @@
+pool:
+  vmImage: 'ubuntu-latest'
+  
+jobs:
+- job: build_and_deploy
+  variables:
+    KUBECONFIG: "${BUILD_SOURCESDIRECTORY}/.kubeconfig"
+    HELM_HOME: "${BUILD_SOURCESDIRECTORY}/.helmconfig"
+    DOCKER_CONFIG: "${BUILD_SOURCESDIRECTORY}/.dockerconfig"
+    AZURE_CONFIG_DIR: "${BUILD_SOURCESDIRECTORY}/.azureconfig"
+
+    DEPLOYMENT_LOCATION: "westeurope"
+    BASE_RESOURCE_NAME: "mercury${BUILD_BUILDID}"
+    AKS_CLUSTER_NAME: $(BASE_RESOURCE_NAME)
+    AKS_RESOURCE_GROUP_NAME: $(BASE_RESOURCE_NAME)
+
+    IMAGE_TAG: "latest"
+    DISABLE_OAUTH_PERMANENTLY: "DISABLE_OAUTH_FOR_CI"
+
+    # These variables need to be passed in. These are mapped as they
+    # should be secrets in your CI system
+    ARM_SUBSCRIPTION_ID: "$(SUBSCRIPTION_ID)"
+    ARM_TENANT_ID: "$(TENANT_ID)"
+    ARM_CLIENT_ID: $(DEPLOYMENT_SP_USR)
+    ARM_CLIENT_SECRET: $(DEPLOYMENT_SP_PSW)
+
+    AKS_SP_APP_ID: $(AKS_SP_USR)
+    AKS_SP_CLIENT_SECRET: $(AKS_SP_PSW)
+    AKS_SP_OBJECT_ID: "$(AKS_SP_OBJECTID)"
+
+  steps:
+  - checkout: self
+    submodules: true
+
+  - script: |
+      export DEPLOYMENT_LOCATION=$(DEPLOYMENT_LOCATION)
+      export BASE_RESOURCE_NAME=$(BASE_RESOURCE_NAME)
+      export AKS_SP_APP_ID=$(AKS_SP_APP_ID)
+      export AKS_SP_OBJECT_ID=$(AKS_SP_OBJECT_ID)
+      export AKS_SP_CLIENT_SECRET=$(AKS_SP_CLIENT_SECRET)
+      export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+      export ARM_TENANT_ID=$(ARM_TENANT_ID)
+      export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
+      export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+      ./deploy/azure/scripts/terraformapply.sh
+    displayName: 'Terraform apply'
+
+  - script: ./build/scripts/dockerbuild.sh
+    displayName: 'Docker build'
+
+  - script: |
+      export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+      export ARM_TENANT_ID=$(ARM_TENANT_ID)
+      export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
+      export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+      export IMAGE_TAG=$(IMAGE_TAG)
+      ./deploy/azure/scripts/dockerpush.sh
+    displayName: 'Docker push'
+
+  - script: |
+      export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+      export ARM_TENANT_ID=$(ARM_TENANT_ID)
+      export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
+      export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+      export AKS_CLUSTER_NAME=$(AKS_CLUSTER_NAME)
+      export AKS_RESOURCE_GROUP_NAME=$(AKS_RESOURCE_GROUP_NAME)
+      ./deploy/azure/scripts/getkubeconfig.sh
+    displayName: 'Get kubeconfig'
+
+  - script: |
+      export IMAGE_TAG=$(IMAGE_TAG)
+      export DISABLE_OAUTH_PERMANENTLY=$(DISABLE_OAUTH_PERMANENTLY)
+      ./deploy/azure/scripts/deploytokubernetes.sh
+    displayName: 'Deploy to kubernetes'
+
+  - script: ./deploy/common/scripts/integrationtest.sh
+    displayName: 'Integration tests'
+
+  - script: |
+      export DEPLOYMENT_LOCATION=$(DEPLOYMENT_LOCATION)
+      export BASE_RESOURCE_NAME=$(BASE_RESOURCE_NAME)
+      export ARM_TENANT_ID=$(ARM_TENANT_ID)
+      export AKS_SP_APP_ID=$(AKS_SP_APP_ID)
+      export AKS_SP_OBJECT_ID=$(AKS_SP_OBJECT_ID)
+      export AKS_SP_CLIENT_SECRET=$(AKS_SP_CLIENT_SECRET)
+      export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+      export ARM_TENANT_ID=$(ARM_TENANT_ID)
+      export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
+      export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+      ./deploy/azure/scripts/terraformdestroy.sh
+    condition: always() 
+    displayName: 'Terraform destroy'
+
+  - script: ./build/scripts/dockercleanup.sh
+    condition: always() 
+    displayName: 'Docker cleanup'

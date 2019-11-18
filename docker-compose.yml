@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  ingestion-api:
+    image: ${DOCKER_REGISTRY-}ingestionapi
+    build:
+      context: .
+      dockerfile: IngestionApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+     - "5000:80"
+  messageprocessor:
+    image: ${DOCKER_REGISTRY-}messageprocessor
+    build:
+      context: .
+      dockerfile: MessageProcessor/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development

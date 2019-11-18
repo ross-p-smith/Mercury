@@ -1,0 +1,7 @@
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentityBinding
+metadata:
+  name: ingestion-api-aad-identity-binding
+spec:
+  AzureIdentity: ingestion-api-aks-pod-id
+  Selector: cloud-resource-access

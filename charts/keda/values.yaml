@@ -1,0 +1,34 @@
+nameOverride:
+fullnameOverride:
+
+image:
+  repository: kedacore/keda
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+customResourceDefinition:
+  create: true
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name:
+
+logLevel: info
+
+#set to a higher verbosity for detailed apiservice logs
+glogLevel: 2
+
+# Set to the value of the Azure Active Directory Pod Identity
+# This will be set as a label on the Keda Pod(s)
+aadPodIdentity: ""
+
+pubsub:
+  subscriptionName: ""
+
+global:
+  cloud: ""

@@ -1,0 +1,119 @@
+pipeline {
+    agent {
+        node {
+            label ''
+            customWorkspace "${JENKINS_HOME}/workspace/${JOB_NAME}/${BUILD_NUMBER}/azure"
+        }
+    }
+
+    parameters {
+        string(name: 'DEPLOYMENT_CRED', defaultValue: 'deployment_service_principal', description: 'The name of the Jenkins credential to use for deployment')
+        string(name: 'LOCATION', defaultValue: 'westus2', description: 'Deployment location')
+
+        string(name: 'SUBSCRIPTION_ID', defaultValue: '', description: 'The Azure subscription to use')
+        string(name: 'TENANT_ID', defaultValue: '', description: 'The Azure tenant id to use')
+
+        string(name: 'AKS_SP_CRED', defaultValue: 'aks_service_principal', description: 'The name of the Jenkins credential to associate with AKS')
+        string(name: 'AKS_SP_OBJ_ID', defaultValue: '', description: 'The Object ID of the SP used by AKS')
+
+        string(name: 'AKS_OAUTH_CLIENT_ID', defaultValue: '', description: 'The client id for the oAuth web registration')
+        string(name: 'AKS_OAUTH_TENANT_ID', defaultValue: '', description: 'The tenant id for the oAuth web registration')
+    }
+
+    environment {
+        KUBECONFIG="${env.WORKSPACE}/.kubeconfig"
+        HELM_HOME="${env.WORKSPACE}/.helmconfig"
+        DOCKER_CONFIG="${env.WORKSPACE}/.dockerconfig"
+        AZURE_CONFIG_DIR="${env.WORKSPACE}/.azureconfig"
+
+        DEPLOYMENT_SP = credentials("${params.DEPLOYMENT_CRED}")
+        DEPLOYMENT_LOCATION = "${params.LOCATION}"
+
+        ARM_CLIENT_ID = "$DEPLOYMENT_SP_USR"
+        ARM_CLIENT_SECRET = "$DEPLOYMENT_SP_PSW"
+        ARM_SUBSCRIPTION_ID = "${params.SUBSCRIPTION_ID}"
+        ARM_TENANT_ID = "${params.TENANT_ID}"
+
+        AKS_SP = credentials("${params.AKS_SP_CRED}")
+        AKS_SP_APP_ID = "$AKS_SP_USR"
+        AKS_SP_CLIENT_SECRET = "$AKS_SP_PSW"
+        AKS_SP_OBJECT_ID = "${params.AKS_SP_OBJ_ID}"
+
+        BASE_RESOURCE_NAME = "mercury${BUILD_NUMBER}"
+
+        AKS_CLUSTER_NAME = "${BASE_RESOURCE_NAME}"
+        AKS_RESOURCE_GROUP_NAME = "${BASE_RESOURCE_NAME}"
+
+        AKS_OAUTH_CLIENT_ID = "${AKS_OAUTH_CLIENT_ID}"
+        AKS_OAUTH_TENANT_ID = "${AKS_OAUTH_TENANT_ID}"
+
+        IMAGE_TAG = "latest"
+
+        DISABLE_OAUTH_PERMANENTLY="DISABLE_OAUTH_FOR_CI"
+    }
+
+    stages {
+
+        stage ("Terraform Apply")
+        {
+            steps {
+
+                sh '''
+                    ./deploy/azure/scripts/terraformapply.sh
+                '''
+            }
+        }
+
+        stage ("Docker Push")
+        {
+            steps {
+
+                sh '''
+                    ./deploy/azure/scripts/dockerpush.sh
+                '''
+            }
+        }
+
+        stage ("Get KubeConfig")
+        {
+            steps {
+                sh '''
+                    ./deploy/azure/scripts/getkubeconfig.sh
+                '''
+            }
+        }
+
+        stage ("Deploy to Kubernetes")
+        {
+            steps {
+                sh '''
+                    ./deploy/azure/scripts/deploytokubernetes.sh
+                '''
+            }
+        }
+
+        stage ("Integration Tests")
+        {
+            steps {
+                sh '''
+                    ./deploy/common/scripts/integrationtest.sh
+                '''
+            }
+        }
+
+    }
+
+    post {
+        always {
+            retry(3) {
+                sh '''
+                    ./deploy/azure/scripts/terraformdestroy.sh
+                '''
+            }
+        }
+
+        failure {
+            sh 'echo "failed"'
+        }
+    }
+}
