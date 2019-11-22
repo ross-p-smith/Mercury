@@ -49,9 +49,10 @@ jobs:
       with:
         token: ${{secrets.github_token}}
     - name: Create base resource name
-      run: echo "::set-env name=BASE_RESOURCE_NAME::mercz$BUILD_NUMBER"
-    - name: Print base resource name
-      run: echo $BASE_RESOURCE_NAME
+      run: 
+        echo "::set-env name=BASE_RESOURCE_NAME::mercz$BUILD_NUMBER"
+        echo "::set-env name=AKS_CLUSTER_NAME::mercz$BUILD_NUMBER"
+        echo "::set-env name=AKS_RESOURCE_GROUP_NAME::mercz$BUILD_NUMBER"
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
       shell: bash
@@ -75,8 +76,6 @@ jobs:
         IMAGE_TAG: "latest"
         DISABLE_OAUTH_PERMANENTLY: "DISABLE_OAUTH_FOR_CI"
         KUBECONFIG: "${HOME}/.kubeconfig"
-        AKS_CLUSTER_NAME: "mercz$BUILD_NUMBER"
-        AKS_RESOURCE_GROUP_NAME: "mercz$BUILD_NUMBER"
         HELM_HOME: "${HOME}/.helmconfig"
         DOCKER_CONFIG: "${HOME}/.dockerconfig"
     - name: Integration Tests
