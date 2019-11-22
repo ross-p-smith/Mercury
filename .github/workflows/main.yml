@@ -47,15 +47,15 @@ jobs:
     - name: Generate build number
       uses: einaregilsson/build-number@v2 
       with:
-        token: ${{secrets.github_token}}        
-    - name: Docker build
-      run:  "build/scripts/dockerbuild.sh"
-      shell: bash
+        token: ${{secrets.github_token}}
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
       shell: bash
       env:
-        BASE_RESOURCE_NAME: "mercz$BUILD_NUMBER"
+        BASE_RESOURCE_NAME: mercz$BUILD_NUMBER
+    - name: Docker build
+      run:  "build/scripts/dockerbuild.sh"
+      shell: bash
     - name: Docker push
       run:  deploy/azure/scripts/dockerpush.sh
       shell: bash
