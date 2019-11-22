@@ -51,7 +51,7 @@ jobs:
     - name: Create base resource name
       run: echo "::set-env name=BASE_RESOURCE_NAME::mercz$BUILD_NUMBER"
     - name: Print base resource name
-      run: echo $BASE_RESOURCE_NAME"
+      run: echo $BASE_RESOURCE_NAME
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
       shell: bash
