@@ -39,19 +39,22 @@ jobs:
   infrastructure:
     runs-on: ubuntu-latest
     env:
-      BASE_RESOURCE_NAME: ross123a
-      AKS_CLUSTER_NAME: ross123a
-      AKS_RESOURCE_GROUP_NAME: ross123a
       DEPLOYMENT_LOCATION: westeurope
     steps:
     - uses: actions/checkout@v1
       with:
         submodules: recursive
-    - name: Docker build
-      run:  "build/scripts/dockerbuild.sh"
-      shell: bash
+    - name: Generate build number
+      uses: einaregilsson/build-number@v2 
+      with:
+        token: ${{secrets.github_token}}
+    - name: Create base resource name
+      run: echo "::set-env name=BASE_RESOURCE_NAME::mercz$BUILD_NUMBER"
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
+      shell: bash
+    - name: Docker build
+      run:  "build/scripts/dockerbuild.sh"
       shell: bash
     - name: Docker push
       run:  deploy/azure/scripts/dockerpush.sh
@@ -72,7 +75,6 @@ jobs:
         KUBECONFIG: "${HOME}/.kubeconfig"
         HELM_HOME: "${HOME}/.helmconfig"
         DOCKER_CONFIG: "${HOME}/.dockerconfig"
-        AZURE_CONFIG_DIR: "${HOME}/.azureconfig"
     - name: Integration Tests
       run:  "deploy/common/scripts/integrationtest.sh"
       shell: bash

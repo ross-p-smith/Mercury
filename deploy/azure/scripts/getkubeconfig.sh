@@ -16,8 +16,7 @@ set -e
 : "${ARM_CLIENT_SECRET?}"
 : "${ARM_TENANT_ID?}"
 : "${ARM_SUBSCRIPTION_ID?}"
-: "${AKS_CLUSTER_NAME?}"
-: "${AKS_RESOURCE_GROUP_NAME?}"
+: "${BASE_RESOURCE_NAME?}"
 : "${KUBECONFIG?}"
 
 # only if ARM_CLIENT_ID to facilitate development
@@ -27,4 +26,4 @@ then
   az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
-az aks get-credentials --name $AKS_CLUSTER_NAME --resource-group $AKS_RESOURCE_GROUP_NAME --overwrite-existing --file $KUBECONFIG
+az aks get-credentials --name $BASE_RESOURCE_NAME --resource-group $BASE_RESOURCE_NAME --overwrite-existing --file $KUBECONFIG

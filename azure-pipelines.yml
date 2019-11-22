@@ -11,9 +11,6 @@ jobs:
 
     DEPLOYMENT_LOCATION: "westeurope"
     BASE_RESOURCE_NAME: "mercury${BUILD_BUILDID}"
-    AKS_CLUSTER_NAME: $(BASE_RESOURCE_NAME)
-    AKS_RESOURCE_GROUP_NAME: $(BASE_RESOURCE_NAME)
-
     IMAGE_TAG: "latest"
     DISABLE_OAUTH_PERMANENTLY: "DISABLE_OAUTH_FOR_CI"
 
@@ -62,8 +59,7 @@ jobs:
       export ARM_TENANT_ID=$(ARM_TENANT_ID)
       export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
       export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
-      export AKS_CLUSTER_NAME=$(AKS_CLUSTER_NAME)
-      export AKS_RESOURCE_GROUP_NAME=$(AKS_RESOURCE_GROUP_NAME)
+      export BASE_RESOURCE_NAME=$(BASE_RESOURCE_NAME)
       ./deploy/azure/scripts/getkubeconfig.sh
     displayName: 'Get kubeconfig'
 
@@ -79,7 +75,6 @@ jobs:
   - script: |
       export DEPLOYMENT_LOCATION=$(DEPLOYMENT_LOCATION)
       export BASE_RESOURCE_NAME=$(BASE_RESOURCE_NAME)
-      export ARM_TENANT_ID=$(ARM_TENANT_ID)
       export AKS_SP_APP_ID=$(AKS_SP_APP_ID)
       export AKS_SP_OBJECT_ID=$(AKS_SP_OBJECT_ID)
       export AKS_SP_CLIENT_SECRET=$(AKS_SP_CLIENT_SECRET)
