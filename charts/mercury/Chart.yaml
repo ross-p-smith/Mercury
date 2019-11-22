@@ -1,5 +1,16 @@
-apiVersion: v1
+apiVersion: v2
 appVersion: "1.0"
 description: A Helm chart for Kubernetes
 name: mercury
 version: 0.1.0
+dependencies:
+- name: aad-pod-identity
+  condition: aad-pod-identity.enabled
+  version: "*"
+  repository: "file://../aad-pod-identity"
+- name: ingestion-api
+  version: "*"
+  repository: "file://../ingestion-api"
+- name: keda
+  version: "*"
+  repository: "file://../keda"

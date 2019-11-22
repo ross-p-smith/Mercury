@@ -7,5 +7,6 @@ local.env
 .terraform.tfstate.lock.info
 ingress-tls.key
 ingress-tls.crt
-charts/mercury/charts
 charts/mercury/requirements.lock
+Chart.lock
+charts/mercury/output

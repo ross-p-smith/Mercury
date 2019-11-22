@@ -31,28 +31,28 @@ else
     ENCODED_TLS_KEY=$(cat $TLS_ORG.key | base64 -w0)
 fi
 
-# Initialize helm TODO: probably need to secure this
-helm init --wait
+#helm dependency build $DIR/../../../charts/mercury
 
-helm dependency build $DIR/../../../charts/mercury
-
-helm install --set global.cloud="azure" \
+helm install $DIR/../../../charts/mercury \
+    --set global.cloud="azure" \
     --set global.image.tag="$IMAGE_TAG" \
     --set global.image.repository=$(terraform output acr_login_server) \
     --set aad-pod-identity.identity.id=$(terraform output aad_pod_identity_id) \
     --set aad-pod-identity.identity.clientId=$(terraform output aad_pod_identity_client_id) \
+    --set keda.azureaccount.name=$(terraform output azure_storage_account_name) \
+    --set keda.storage_folder=$(terraform output storage_container) \
+    --set keda.storage.queue.name=$(terraform output queue_name) \
     --set ingestion-api.azure.instrumentation.key=$(terraform output instrumentation_key) \
     --set ingestion-api.azureaccount.name=$(terraform output azure_storage_account_name) \
     --set ingestion-api.storage_folder=$(terraform output storage_container) \
     --set ingestion-api.storage.queue.name=$(terraform output queue_name) \
-    --set keda.azureaccount.name=$(terraform output azure_storage_account_name) \
-    --set keda.storage_folder=$(terraform output storage_container) \
-    --set keda.storage.queue.name=$(terraform output queue_name) \
     --set ingestion-api.oauth.clientId="$(terraform output oauth_client_id)" \
     --set ingestion-api.oauth.tenantId="$(terraform output oauth_tenant_id)" \
     --set ingestion-api.disable.oauth="$DISABLE_OAUTH_PERMANENTLY" \
     --set ingestion-api.hostname="$API_HOSTNAME" \
     --set ingestion-api.tls.crt="$ENCODED_TLS_CRT" \
     --set ingestion-api.tls.key="$ENCODED_TLS_KEY" \
-    --wait \
-    $DIR/../../../charts/mercury
+    --generate-name --dependency-update --debug
+#    --output-dir $DIR/../../../charts/helmoutput
+
+#helm install $DIR/helmoutput --generate-name
