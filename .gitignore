@@ -3,3 +3,6 @@ bin
 .terraform
 terraform.tfstate
 terraform.tfstate.backup
+local.env
+ingress-tls.crt
+ingress-tls.key
