@@ -84,8 +84,6 @@ jobs:
       if: always()
       run:  "deploy/azure/scripts/terraformdestroy.sh"
       shell: bash
-      env:
-        BASE_RESOURCE_NAME: "mercz$BUILD_NUMBER"
     - name: Docker Cleanup
       if: always()
       run:  "build/scripts/dockercleanup.sh"
