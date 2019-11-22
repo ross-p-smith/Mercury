@@ -37,7 +37,7 @@ az acr login --name "$registry_name"
 # Tag the built image specifically for Azure ACR before pushing
 docker tag ingestion-api $ACR_REGISTRY_URI/ingestion-api:$IMAGE_TAG
 docker tag messageprocessor $ACR_REGISTRY_URI/messageprocessor:$IMAGE_TAG
-docker tag keda $ACR_REGISTRY_URI/keda:$IMAGE_TAG
+docker tag kedacore/keda:1.0.0 $ACR_REGISTRY_URI/keda:$IMAGE_TAG
 
 docker push $ACR_REGISTRY_URI/ingestion-api:$IMAGE_TAG
 docker push $ACR_REGISTRY_URI/messageprocessor:$IMAGE_TAG
