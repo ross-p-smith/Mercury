@@ -49,10 +49,7 @@ jobs:
       with:
         token: ${{secrets.github_token}}
     - name: Create base resource name
-      run: 
-        echo "::set-env name=BASE_RESOURCE_NAME::mercz$BUILD_NUMBER"
-        echo "::set-env name=AKS_CLUSTER_NAME::mercz$BUILD_NUMBER"
-        echo "::set-env name=AKS_RESOURCE_GROUP_NAME::mercz$BUILD_NUMBER"
+      run: echo "::set-env name=BASE_RESOURCE_NAME::mercz$BUILD_NUMBER"
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
       shell: bash
