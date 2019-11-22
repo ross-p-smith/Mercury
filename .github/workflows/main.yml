@@ -49,12 +49,12 @@ jobs:
       with:
         token: ${{secrets.github_token}}
     - name: Create base resource name
-      run: echo "mercz$BASE_RESOURCE_NAME"
+      run: echo "::set-env name=BASE_RESOURCE_NAME::mercz$BUILD_NUMBER"
+    - name: Print base resource name
+      run: echo $BASE_RESOURCE_NAME"
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
       shell: bash
-      env:
-        BASE_RESOURCE_NAME: "mercuz$BUILD_NUMBER"
     - name: Docker build
       run:  "build/scripts/dockerbuild.sh"
       shell: bash
