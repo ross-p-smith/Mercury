@@ -49,12 +49,14 @@ jobs:
       with:
         token: ${{secrets.github_token}}
     - name: Print new build number
-      run: echo "Build number is $BUILD_NUMBER"        
+      run: echo "Build number is $BASE_RESOURCE_NAME"
+      env:
+        BASE_RESOURCE_NAME: ${{ join('mercz', $BUILD_NUMBER) }}
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
       shell: bash
       env:
-        BASE_RESOURCE_NAME: mercz$BUILD_NUMBER
+        BASE_RESOURCE_NAME: ${{ join('mercz', $BUILD_NUMBER) }}
     - name: Docker build
       run:  "build/scripts/dockerbuild.sh"
       shell: bash
