@@ -50,13 +50,11 @@ jobs:
         token: ${{secrets.github_token}}
     - name: Create base resource name
       run: echo "mercz$BASE_RESOURCE_NAME"
-      env:
-        BASE_RESOURCE_NAME: ${{ join('mercz', BUILD_NUMBER) }}
     - name: Terraform Apply
       run:  "deploy/azure/scripts/terraformapply.sh"
       shell: bash
       env:
-        BASE_RESOURCE_NAME: ${{ join('mercz', BUILD_NUMBER) }}
+        BASE_RESOURCE_NAME: ${{ $BUILD_NUMBER }}
     - name: Docker build
       run:  "build/scripts/dockerbuild.sh"
       shell: bash
