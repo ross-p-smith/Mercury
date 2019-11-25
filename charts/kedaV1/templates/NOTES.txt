@@ -1,0 +1,5 @@
+These charts came from https://github.com/kedacore/keda v1.0.0.
+The following changes were made
+1) Added triggerauthentication.yaml
+2) Added test-scaledobject.yaml
+3) Set aadpodidentity value to be the binding from our Pod Identity chart

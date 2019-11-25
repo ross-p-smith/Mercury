@@ -12,6 +12,4 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # with multiple clouds.
 docker build -t ingestion-api $DIR/../.. -f $DIR/../../IngestionApi/Dockerfile
 docker build -t messageprocessor $DIR/../../ -f $DIR/../../MessageProcessor/Dockerfile
-docker build -t keda $DIR/../../KEDA
 docker build -t ingestion-api-test $DIR/../.. -f $DIR/../../IngestionApi/Dockerfile --target=IntegrationTest
-

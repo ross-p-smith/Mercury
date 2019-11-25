@@ -45,6 +45,7 @@ helm install --set global.cloud="azure" \
     --set ingestion-api.azureaccount.name=$(terraform output azure_storage_account_name) \
     --set ingestion-api.storage_folder=$(terraform output storage_container) \
     --set ingestion-api.storage.queue.name=$(terraform output queue_name) \
+    --set keda.aadPodIdentity="cloud-resource-access" \
     --set keda.azureaccount.name=$(terraform output azure_storage_account_name) \
     --set keda.storage_folder=$(terraform output storage_container) \
     --set keda.storage.queue.name=$(terraform output queue_name) \
@@ -54,5 +55,5 @@ helm install --set global.cloud="azure" \
     --set ingestion-api.hostname="$API_HOSTNAME" \
     --set ingestion-api.tls.crt="$ENCODED_TLS_CRT" \
     --set ingestion-api.tls.key="$ENCODED_TLS_KEY" \
-    --wait \
+    --wait --debug --timeout 500 \
     $DIR/../../../charts/mercury

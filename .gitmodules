@@ -1,3 +1,0 @@
-[submodule "KEDA"]
-	path = KEDA
-	url = https://github.com/stgricci/keda.git

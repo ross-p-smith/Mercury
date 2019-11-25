@@ -17,6 +17,9 @@ aad-pod-identity:
     id: ""
     clientId: ""
 
+keda:
+  aadPodIdentity: ""
+
 global:
   cloud: ""
   image:

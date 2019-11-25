@@ -6,3 +6,5 @@ terraform.tfstate.backup
 local.env
 ingress-tls.crt
 ingress-tls.key
+*.lock
+charts/mercury/charts/
