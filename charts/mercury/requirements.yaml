@@ -8,4 +8,4 @@ dependencies:
   repository: "file://../ingestion-api"
 - name: keda
   version: "*"
-  repository: "file://../keda"
+  repository: "file://../kedaV1"

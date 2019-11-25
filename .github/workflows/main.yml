@@ -80,11 +80,11 @@ jobs:
       shell: bash
       env:
         KUBECONFIG: "${HOME}/.kubeconfig"
-    - name: Terraform Destroy
-      if: always()
-      run:  "deploy/azure/scripts/terraformdestroy.sh"
-      shell: bash
-    - name: Docker Cleanup
-      if: always()
-      run:  "build/scripts/dockercleanup.sh"
-      shell: bash
+    # - name: Terraform Destroy
+    #   if: always()
+    #   run:  "deploy/azure/scripts/terraformdestroy.sh"
+    #   shell: bash
+    # - name: Docker Cleanup
+    #   if: always()
+    #   run:  "build/scripts/dockercleanup.sh"
+    #   shell: bash

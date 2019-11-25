@@ -14,5 +14,5 @@ docker build -t ingestion-api $DIR/../.. -f $DIR/../../IngestionApi/Dockerfile
 docker build -t messageprocessor $DIR/../../ -f $DIR/../../MessageProcessor/Dockerfile
 docker build -t ingestion-api-test $DIR/../.. -f $DIR/../../IngestionApi/Dockerfile --target=IntegrationTest
 #docker build -t keda $DIR/../../KEDA
-docker pull kedacore/keda:1.0.0
+#docker pull kedacore/keda:1.0.0
 

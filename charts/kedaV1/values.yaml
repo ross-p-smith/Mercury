@@ -1,0 +1,16 @@
+aadPodIdentity: "cloud-resource-access"
+customResourceDefinition:
+  create: false
+grpcTLSCertsSecret: ""
+image:
+  keda: docker.io/kedacore/keda:1.0.0
+  metricsAdapter: docker.io/kedacore/keda-metrics-adapter:1.0.0
+  pullPolicy: Always
+operatorName: keda-operator
+rbac:
+  create: true
+replicaCount: 1
+serviceAccount:
+  create: true
+  name: keda-operator
+watchNamespace: ""
