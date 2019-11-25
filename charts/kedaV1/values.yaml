@@ -1,6 +1,6 @@
-aadPodIdentity: "cloud-resource-access"
+aadPodIdentity: ""
 customResourceDefinition:
-  create: false
+  create: true
 grpcTLSCertsSecret: ""
 image:
   keda: docker.io/kedacore/keda:1.0.0
