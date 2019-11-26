@@ -13,9 +13,12 @@ ingestion-api:
     clientId: ""
 
 aad-pod-identity:
-  identity:
-    id: ""
-    clientId: ""
+  azureIdentity:
+    enabled: true
+    resourceID: ""
+    clientID: ""
+  azureIdentityBinding:
+    selector: ""
 
 keda:
   aadPodIdentity: ""

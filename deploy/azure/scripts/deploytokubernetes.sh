@@ -14,6 +14,8 @@ set -e
 # these relative paths will need to be updated.
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+POD_IDENTITY_SELECTOR="cloud-resource-access"
+
 # Create TLS certs and Keys for the correct domain $API_HOSTNAME
 # Base64 encoded the contents of the cert and key files -w0 ignores the newlines in the files
 API_HOSTNAME="demo.azure.com"
@@ -34,18 +36,21 @@ fi
 # Initialize helm TODO: probably need to secure this
 helm init --wait
 
-helm dependency build $DIR/../../../charts/mercury
+helm repo add aad-pod-identity https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
+
+helm dependency update $DIR/../../../charts/mercury
 
 helm install --set global.cloud="azure" \
     --set global.image.tag="$IMAGE_TAG" \
     --set global.image.repository=$(terraform output acr_login_server) \
-    --set aad-pod-identity.identity.id=$(terraform output aad_pod_identity_id) \
-    --set aad-pod-identity.identity.clientId=$(terraform output aad_pod_identity_client_id) \
+    --set aad-pod-identity.azureIdentity.resourceID=$(terraform output aad_pod_identity_id) \
+    --set aad-pod-identity.azureIdentity.clientID=$(terraform output aad_pod_identity_client_id) \
+    --set aad-pod-identity.azureIdentityBinding.selector=$POD_IDENTITY_SELECTOR \
     --set ingestion-api.azure.instrumentation.key=$(terraform output instrumentation_key) \
     --set ingestion-api.azureaccount.name=$(terraform output azure_storage_account_name) \
     --set ingestion-api.storage_folder=$(terraform output storage_container) \
     --set ingestion-api.storage.queue.name=$(terraform output queue_name) \
-    --set keda.aadPodIdentity="cloud-resource-access" \
+    --set keda.aadPodIdentity=$POD_IDENTITY_SELECTOR \
     --set keda.azureaccount.name=$(terraform output azure_storage_account_name) \
     --set keda.storage_folder=$(terraform output storage_container) \
     --set keda.storage.queue.name=$(terraform output queue_name) \
